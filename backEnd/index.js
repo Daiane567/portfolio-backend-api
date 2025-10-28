@@ -11,12 +11,24 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Middlewares
 app.use(express.json());
-app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
 
-// Rota teste
+// ✅ CORS configurado corretamente
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // para teste local
+      "https://portfolio-backend-api-jpzu.onrender.com", // o próprio backend
+      "https://seu-frontend.vercel.app", // 🔁 TROQUE pelo seu domínio real do Vercel
+    ],
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
+
+// 🔹 Rota teste
 app.get("/", (req, res) => res.send("API de Contato funcionando! 🚀"));
 
-// Rota de envio de email
+// 🔹 Rota de envio de email
 app.post("/api/contato", async (req, res) => {
   const { nome, email, mensagem } = req.body;
 
@@ -26,8 +38,8 @@ app.post("/api/contato", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: "Portfolio <onboarding@resend.dev>", // endereço padrão gratuito
-      to: process.env.EMAIL, // o destino real (você)
+      from: "Portfolio <onboarding@resend.dev>", // remetente gratuito do Resend
+      to: process.env.EMAIL, // seu email configurado no .env
       subject: `Mensagem de ${nome} via Portfólio`,
       text: `
         Nome: ${nome}
@@ -39,9 +51,9 @@ app.post("/api/contato", async (req, res) => {
 
     res.json({ message: "Mensagem enviada com sucesso!" });
   } catch (error) {
-    console.error("Erro ao enviar email:", error);
+    console.error("❌ Erro ao enviar email:", error);
     res.status(500).json({ error: "Erro ao enviar a mensagem." });
   }
 });
 
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
